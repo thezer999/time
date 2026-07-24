@@ -3,63 +3,84 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Часы, Будильник и Таймер</title>
+  <title>Будильник и Таймер</title>
   <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-color: #f8fafc;
+      --accent-color: #38bdf8;
+      --accent-hover: #0284c7;
+      --danger-color: #ef4444;
+      --muted-color: #94a3b8;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
-      background: linear-gradient(135deg, #1f1c2c, #928dab);
-      color: #fff;
-      min-height: 100vh;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       display: flex;
       justify-content: center;
       align-items: center;
+      min-height: 100vh;
       padding: 20px;
     }
 
     .container {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 450px;
       border-radius: 20px;
       padding: 30px;
-      width: 100%;
-      max-width: 500px;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     }
 
     /* Вкладки */
     .tabs {
       display: flex;
-      justify-content: space-around;
       margin-bottom: 25px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-      padding-bottom: 10px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 5px;
     }
 
     .tab-btn {
-      background: none;
+      flex: 1;
+      padding: 12px;
       border: none;
-      color: #ccc;
+      background: none;
+      color: var(--muted-color);
       font-size: 16px;
-      font-weight: bold;
+      font-weight: 600;
       cursor: pointer;
-      transition: color 0.3s;
+      border-radius: 8px;
+      transition: all 0.3s ease;
     }
 
     .tab-btn.active {
-      color: #00f2fe;
-      border-bottom: 2px solid #00f2fe;
-      padding-bottom: 5px;
+      background-color: var(--accent-color);
+      color: var(--bg-color);
     }
 
+    /* Часы реального времени */
+    .clock-display {
+      text-align: center;
+      font-size: 42px;
+      font-weight: bold;
+      margin-bottom: 25px;
+      letter-spacing: 2px;
+      color: var(--accent-color);
+    }
+
+    /* Контент вкладок */
     .tab-content {
       display: none;
-      text-align: center;
     }
 
     .tab-content.active {
@@ -67,228 +88,234 @@
     }
 
     /* Элементы управления */
-    .time-display {
+    .input-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    input[type="time"], input[type="number"] {
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--muted-color);
+      color: var(--text-color);
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 18px;
+      outline: none;
+      text-align: center;
+    }
+
+    input[type="number"] {
+      width: 80px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--accent-color);
+      color: var(--bg-color);
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background-color: #dc2626;
+    }
+
+    /* Дисплей таймера */
+    .timer-display {
+      text-align: center;
       font-size: 48px;
       font-weight: bold;
       margin: 20px 0;
-      letter-spacing: 2px;
+      font-family: monospace;
     }
 
-    .controls input, .controls select, .controls button {
-      padding: 10px;
-      margin: 5px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-    }
-
-    .controls input, .controls select {
-      background: rgba(255, 255, 255, 0.8);
-      color: #333;
-    }
-
-    button {
-      background: #00f2fe;
-      color: #1f1c2c;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s, transform 0.1s;
-    }
-
-    button:hover {
-      background: #4facfe;
-    }
-
-    button:active {
-      transform: scale(0.95);
-    }
-
-    /* Мировое время */
-    .world-clock-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px;
-      background: rgba(255, 255, 255, 0.05);
-      margin-top: 10px;
-      border-radius: 8px;
-    }
-
-    .status {
+    .status-text {
+      text-align: center;
+      color: var(--muted-color);
       margin-top: 15px;
       font-size: 14px;
-      color: #00f2fe;
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <!-- Навигация по вкладкам -->
+    <!-- Реальное время -->
+    <div class="clock-display" id="clock">00:00:00</div>
+
+    <!-- Вкладки -->
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('world')">Мировое время</button>
-      <button class="tab-btn" onclick="switchTab('alarm')">Будильник</button>
+      <button class="tab-btn active" onclick="switchTab('alarm')">Будильник</button>
       <button class="tab-btn" onclick="switchTab('timer')">Таймер</button>
     </div>
 
-    <!-- Раздел: Мировое время -->
-    <div id="world" class="tab-content active">
-      <h2>Мировое время</h2>
-      <div class="time-display" id="local-time">00:00:00</div>
-      <p>Ваше местное время</p>
-      <hr style="margin: 20px 0; border: 0.5px solid rgba(255,255,255,0.1);">
-      <div id="world-clocks"></div>
-    </div>
-
     <!-- Раздел: Будильник -->
-    <div id="alarm" class="tab-content">
-      <h2>Будильник</h2>
-      <div class="time-display" id="alarm-display">--:--</div>
-      <div class="controls">
-        <input type="time" id="alarm-time">
-        <button onclick="setAlarm()">Установить</button>
-        <button onclick="clearAlarm()" style="background: #ff5858; color: #fff;">Сбросить</button>
+    <div id="alarm-tab" class="tab-content active">
+      <div class="input-group">
+        <nput type="time" id="alarm-time">
       </div>
-      <div class="status" id="alarm-status">Будильник не установлен</div>
+      <button class="btn" id="alarm-btn" onclick="toggleAlarm()">Установить будильник</button>
+      <div class="status-text" id="alarm-status">Будильник не установлен</div>
     </div>
 
     <!-- Раздел: Таймер -->
-    <div id="timer" class="tab-content">
-      <h2>Таймер</h2>
-      <div class="time-display" id="timer-display">00:00</div>
-      <div class="controls">
-        <input type="number" id="timer-input" placeholder="Минуты" min="1" style="width: 100px;">
-        <br>
-        <button onclick="startTimer()">Старт</button>
-        <button onclick="pauseTimer()">Пауза</button>
-        <button onclick="resetTimer()" style="background: #ff5858; color: #fff;">Сброс</button>
+    <div id="timer-tab" class="tab-content">
+      <div class="timer-display" id="timer-display">00:00</div>
+      <div class="input-group" id="timer-inputs">
+        <input type="number" id="timer-min" placeholder="Мин" min="0" max="99">
+        <input type="number" id="timer-sec" placeholder="Сек" min="0" max="59">
       </div>
+      <button class="btn" id="timer-btn" onclick="toggleTimer()">Старт</button>
     </div>
   </div>
 
   <script>
-    // --- Переключение вкладок ---
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-      
-      document.getElementById(tabId).classList.add('active');
-      event.target.classList.add('active');
-    }
-
-    // --- Звуковой сигнал ---
-    function playBeep() {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioCtx.createOscillator();
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); // Нота Ля
-      oscillator.connect(audioCtx.destination);
-      oscillator.start();
-      oscillator.stop(audioCtx.currentTime + 1.5); // Звучит 1.5 секунды
-    }
-
-    // --- Мировое время ---
-    const cities = [
-      { name: 'Лондон', zone: 'Europe/London' },
-      { name: 'Нью-Йорк', zone: 'America/New_York' },
-      { name: 'Токио', zone: 'Asia/Tokyo' }
-    ];
-
-    function updateClocks() {
+    // --- Часы реального времени ---
+    function updateClock() {
       const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
       
-      // Местное время
-      document.getElementById('local-time').textContent = now.toLocaleTimeString('ru-RU');
-
-      // Мировые города
-      const container = document.getElementById('world-clocks');
-      container.innerHTML = '';
-      cities.forEach(city => {
-        const timeString = new Date().toLocaleTimeString('ru-RU', { timeZone: city.zone });
-        const item = document.createElement('div');
-        item.className = 'world-clock-item';
-        item.innerHTML = `<span>${city.name}</span><strong>${timeString}</strong>`;
-        container.appendChild(item);
-      });
+      document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
 
       // Проверка будильника
-      checkAlarm(now);
+      if (alarmTime && `${hours}:${minutes}` === alarmTime && seconds === '00') {
+        triggerSound("🔔 Будильник звонит!");
+        toggleAlarm(true); // Сбросить будильник после срабатывания
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // --- Переключение вкладок ---
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      if (tabName === 'alarm') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('alarm-tab').classList.add('active');
+      } else {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('timer-tab').classList.add('active');
+      }
     }
 
-    setInterval(updateClocks, 1000);
-    updateClocks();
-
-    // --- Будильник ---
+    // --- Логика Будильника ---
     let alarmTime = null;
 
-    function setAlarm() {
-      const input = document.getElementById('alarm-time').value;
-      if (input) {
-        alarmTime = input;
-        document.getElementById('alarm-display').textContent = alarmTime;
-        document.getElementById('alarm-status').textContent = `Будильник установлен на ${alarmTime}`;
+    function toggleAlarm(forceReset = false) {
+      const alarmInput = document.getElementById('alarm-time');
+      const alarmBtn = document.getElementById('alarm-btn');
+      const alarmStatus = document.getElementById('alarm-status');
+
+      if (alarmTime || forceReset) {
+        alarmTime = null;
+        alarmInput.disabled = false;
+        alarmBtn.textContent = "Установить будильник";
+        alarmBtn.classList.remove('btn-danger');
+        alarmStatus.textContent = "Будильник не установлен";
+      } else {
+        if (!alarmInput.value) return alert("Пожалуйста, выберите время!");
+        alarmTime = alarmInput.value;
+        alarmInput.disabled = true;
+        alarmBtn.textContent = "Отменить будильник";
+        alarmBtn.classList.add('btn-danger');
+        alarmStatus.textContent = `Установлен на ${alarmTime}`;
       }
     }
 
-    function clearAlarm() {
-      alarmTime = null;
-      document.getElementById('alarm-display').textContent = '--:--';
-      document.getElementById('alarm-status').textContent = 'Будильник не установлен';
-    }
-
-    function checkAlarm(now) {
-      if (!alarmTime) return;
-      const currentHM = now.toTimeString().substring(0, 5);
-      if (currentHM === alarmTime && now.getSeconds() === 0) {
-        playBeep();
-        alert('⏰ БУДИЛЬНИК ЗВОНИТ!');
-        clearAlarm();
-      }
-    }
-
-    // --- Таймер ---
+    // --- Логика Таймера ---
     let timerInterval = null;
-    let timeRemaining = 0;
+    let totalSeconds = 0;
+
+    function toggleTimer() {
+      const timerBtn = document.getElementById('timer-btn');
+      const minInput = document.getElementById('timer-min');
+      const secInput = document.getElementById('timer-sec');
+
+      if (timerInterval) {
+        // Остановить таймер
+        clearInterval(timerInterval);
+        timerInterval = null;
+        timerBtn.textContent = "Старт";
+        timerBtn.classList.remove('btn-danger');
+        document.getElementById('timer-inputs').style.display = 'flex';
+      } else {
+        // Запустить таймер
+        const mins = parseInt(minInput.value) || 0;
+        const secs = parseInt(secInput.value) || 0;
+        totalSeconds = mins * 60 + secs;
+
+        if (totalSeconds <= 0) return alert("Введите время для таймера!");
+
+        document.getElementById('timer-inputs').style.display = 'none';
+        timerBtn.textContent = "Сброс";
+        timerBtn.classList.add('btn-danger');
+        
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+          totalSeconds--;
+          updateTimerDisplay();
+
+          if (totalSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            triggerSound("⏰ Время таймера истекло!");
+            timerBtn.textContent = "Старт";
+            timerBtn.classList.remove('btn-danger');
+            document.getElementById('timer-inputs').style.display = 'flex';
+          }
+        }, 1000);
+      }
+    }
 
     function updateTimerDisplay() {
-      const minutes = Math.floor(timeRemaining / 60);
-      const seconds = timeRemaining % 60;
+      const mins = Math.floor(totalSeconds / 60);
+      const secs = totalSeconds % 60;
       document.getElementById('timer-display').textContent = 
-        `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     }
 
-    function startTimer() {
-      if (timerInterval) return; // Если уже запущен
+    // --- Звуковое уведомление (Web Audio API) ---
+    function triggerSound(message) {
+      // Генерация звукового сигнала через браузер без внешних файлов
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
 
-      if (timeRemaining === 0) {
-        const minutes = parseInt(document.getElementById('timer-input').value);
-        if (isNaN(minutes) || minutes <= 0) return;
-        timeRemaining = minutes * 60;
-      }
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // Нота Ля (880 Гц)
+      
+      // Импульсный звук (пищание)
+      gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
 
-      updateTimerDisplay();
-      timerInterval = setInterval(() => {
-        timeRemaining--;
-        updateTimerDisplay();
-
-        if (timeRemaining <= 0) {
-          clearInterval(timerInterval);
-          timerInterval = null;
-          playBeep();
-          alert('⏳ Время таймера истекло!');
-        }
+      oscillator.start();
+      
+      setTimeout(() => {
+        oscillator.stop();
+        alert(message);
       }, 1000);
-    }
-
-    function pauseTimer() {
-      clearInterval(timerInterval);
-      timerInterval = null;
-    }
-
-    function resetTimer() {
-      pauseTimer();
-      timeRemaining = 0;
-      updateTimerDisplay();
-      document.getElementById('timer-input').value = '';
     }
   </script>
 </body>
